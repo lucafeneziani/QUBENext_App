@@ -2,7 +2,7 @@ import numpy as np
 from PyQt5 import QtGui
 from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMainWindow, QDesktopWidget, QPushButton, QLabel, QFileDialog #, QVBoxLayout, QLineEdit, QMessageBox, QWidget, QGridLayout
+from PyQt5.QtWidgets import QMainWindow, QDesktopWidget, QPushButton, QLabel, QFileDialog, QMessageBox #, QVBoxLayout, QLineEdit, QWidget, QGridLayout
 import pyqtgraph as pg
 import os
 
@@ -94,9 +94,12 @@ class QApp(QMainWindow):
 
         #########################################################################
         # LEFT SIDE
-
+        
         # Z Plot
         self.ZPlot = pg.PlotWidget(self)
+        self.ZPlot.setLabel('left','counts')
+        self.ZPlot.setLabel('bottom','channels')
+        self.ZPlot.setTitle('Profile Z total counts')
         self.ZPlot.resize(round(0.65*width), round(0.25*height))
         self.ZPlot.move(round(0.02*width), round(0.1*height))
         self.ZPlot.setBackground('w')
@@ -130,6 +133,9 @@ class QApp(QMainWindow):
 
         # X Plot
         self.XPlot = pg.PlotWidget(self)
+        self.XPlot.setLabel('left','counts')
+        self.XPlot.setLabel('bottom','channels')
+        self.XPlot.setTitle('Profile X total counts')
         self.XPlot.resize(round(0.28*width), round(0.25*height))
         self.XPlot.move(round(0.02*width), round(0.4*height))
         self.XPlot.setBackground('w')
@@ -163,6 +169,9 @@ class QApp(QMainWindow):
 
         # Y Plot
         self.YPlot = pg.PlotWidget(self)
+        self.YPlot.setLabel('left','counts')
+        self.YPlot.setLabel('bottom','channels')
+        self.YPlot.setTitle('Profile Y total counts')
         self.YPlot.resize(round(0.28*width), round(0.25*height))
         self.YPlot.move(round(0.39*width), round(0.4*height))
         self.YPlot.setBackground('w')
@@ -474,6 +483,8 @@ class QApp(QMainWindow):
         self.Z_data_y = self.Z_Data
         self.ZPlot.clear()
         self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
+        self.ZPlot.setLabel('bottom','channels')
+        self.ZPlot.getPlotItem().enableAutoRange()
 
         self.shawZraw.setEnabled(True)
         self.reverseZdata.setEnabled(True)
@@ -483,7 +494,6 @@ class QApp(QMainWindow):
         self.analyze.setEnabled(True)
         self.resetZplot.setEnabled(True)
         self.Zdataplot = True
-
 
 
     def Load_X_Data(self):
@@ -505,6 +515,8 @@ class QApp(QMainWindow):
         self.X_data_y = self.X_Data
         self.XPlot.clear()
         self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
+        self.XPlot.setLabel('bottom','channels')
+        self.XPlot.getPlotItem().enableAutoRange()
         
         self.shawXraw.setEnabled(True)
         self.enableX.setEnabled(True)
@@ -534,6 +546,8 @@ class QApp(QMainWindow):
         self.Y_data_y = self.Y_Data
         self.YPlot.clear()
         self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
+        self.YPlot.setLabel('bottom','channels')
+        self.YPlot.getPlotItem().enableAutoRange()
         
         self.shawYraw.setEnabled(True)
         self.enableY.setEnabled(True)
@@ -754,6 +768,9 @@ class QApp(QMainWindow):
         self.ZPlot.clear()
         self.XPlot.clear()
         self.YPlot.clear()
+        self.ZPlot.setLabel('bottom','channels')
+        self.XPlot.setLabel('bottom','channels')
+        self.YPlot.setLabel('bottom','channels')
 
         # Data
         self.Z_Data = []
@@ -818,10 +835,32 @@ class QApp(QMainWindow):
         
         return
     
+
+    def Check_direction(self):
+        left_edge  = np.mean(self.Z_data_y[0:10])
+        right_edge = np.mean(self.Z_data_y[len(self.Z_data_y)-10::])
+        
+        if left_edge < right_edge:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+            msg.setText("Warning")
+            msg.setInformativeText('The Z data seems to be reversed, do you want to continue?')
+            ret = msg.exec_()
+
+            if ret == QMessageBox.Ok:
+                return 'ok'
+            else:
+                return 'no'
+
+    
     def Analyze(self):
 
         # MLIC Analysis (Z Profile)
         if self.mlic_enable:
+
+            if self.Check_direction() == 'no':
+                return
 
             self.Zres = functions.mlic_analysis(self.Z_data_y, self.bortfeld_enable)
             self.Z_data_x = self.Zres['coordinates_raw']
@@ -830,8 +869,10 @@ class QApp(QMainWindow):
             self.Z_fit_y = self.Zres['fit_data']
 
             self.ZPlot.clear()
+            self.ZPlot.setLabel('bottom','depth [cm w.e.]')
             self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
             self.ZPlot.plot(self.Z_fit_x, self.Z_fit_y, pen = self.pen_fit)
+            self.ZPlot.getPlotItem().enableAutoRange()
             self.shawZfit.setEnabled(True)
             self.Zdataplot = True
             self.Zfitplot = True
@@ -850,8 +891,10 @@ class QApp(QMainWindow):
             self.X_fit_y = self.Xres['fit_data']
 
             self.XPlot.clear()
+            self.XPlot.setLabel('bottom','[mm]')
             self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
             self.XPlot.plot(self.X_fit_x, self.X_fit_y, pen = self.pen_fit)
+            self.XPlot.getPlotItem().enableAutoRange()
             self.shawXfit.setEnabled(True)
             self.Xdataplot = True
             self.Xfitplot = True
@@ -870,8 +913,10 @@ class QApp(QMainWindow):
             self.Y_fit_y = self.Yres['fit_data']
 
             self.YPlot.clear()
+            self.YPlot.setLabel('bottom','[mm]')
             self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
             self.YPlot.plot(self.Y_fit_x, self.Y_fit_y, pen = self.pen_fit)
+            self.YPlot.getPlotItem().enableAutoRange()
             self.shawYfit.setEnabled(True)
             self.Ydataplot = True
             self.Yfitplot = True
@@ -880,7 +925,11 @@ class QApp(QMainWindow):
                                                                                            self.Yres['fwhm']['value'],self.Yres['fwhm']['unit'],
                                                                                            self.Yres['peak_width']['value'],self.Yres['peak_width']['unit']))
         
-    
-        
+        if self.mlic_enable == False and self.xpos_enable == False and self.ypos_enable == False:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setText("Warning")
+            msg.setInformativeText('Nothing to analyze:\nload files and press enable button')
+            msg.exec_()
         
         return

@@ -36,13 +36,6 @@ class QApp(QMainWindow):
         self.calibY_enable   = False
         self.isflipped       = False
 
-        self.Zdataplot = False
-        self.Zfitplot  = False
-        self.Xdataplot = False
-        self.Xfitplot  = False
-        self.Ydataplot = False
-        self.Yfitplot  = False
-
         #########################################################################
         # GUI STYLE
         
@@ -66,16 +59,13 @@ class QApp(QMainWindow):
         # Bar
         self.barlabel = QLabel(self)
         self.pixmap = QPixmap('/Users/lucafeneziani/Desktop/QUBENext_App/images/bar.png')
-        #self.pixmap = QPixmap('./images/bar.png')
         self.barlabel.setPixmap(self.pixmap)
-        #self.pixmap = self.pixmap.scaled(round(width), round(0.1*height),Qt.KeepAspectRatio,Qt.SmoothTransformation)
         self.barlabel.resize(round(width), round(0.08*height))
         self.barlabel.move(round(0.0*width), round(0.0*height))
 
         # De.Tec.Tor Logo
         self.logolabel = QLabel(self)
         self.pixmap = QPixmap('/Users/lucafeneziani/Desktop/QUBENext_App/images/DeTecTor.png')
-        #self.pixmap = QPixmap('./images/DeTecTor.png')
         self.pixmap = self.pixmap.scaled(round(0.25*width), round(0.1*height),Qt.KeepAspectRatio,Qt.SmoothTransformation)
         self.logolabel.setPixmap(self.pixmap)
         self.logolabel.resize(round(0.27*width), round(0.08*height))
@@ -469,20 +459,20 @@ class QApp(QMainWindow):
 
     ########################################################################################################################################
     def Load_Z_Data(self):
-        '''
+        
         data = np.loadtxt('./data/mlic/20161019_011009_QUBE.dat', dtype=str, delimiter = '\t')
         '''
         file = QFileDialog.getOpenFileName(self, os.getcwd())[0]
         data = np.loadtxt(file, dtype=str, delimiter = '\t')
         self.labelZfile.setText(file.split('/')[-1])
-        
+        '''
         self.Z_Time = data[-1][0].astype(float)
         self.Z_Data = data[-1][1::].astype(float)
 
         self.Z_data_x = range(len(self.Z_Data))
         self.Z_data_y = self.Z_Data
         self.ZPlot.clear()
-        self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
+        self.Zraw = self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
         self.ZPlot.setLabel('bottom','channels')
         self.ZPlot.getPlotItem().enableAutoRange()
 
@@ -493,17 +483,16 @@ class QApp(QMainWindow):
         self.loadZcalib.setEnabled(True)
         self.analyze.setEnabled(True)
         self.resetZplot.setEnabled(True)
-        self.Zdataplot = True
 
 
     def Load_X_Data(self):
-        '''
+        
         data = np.loadtxt('./data/strip/20151127_005129_miniQ-X.dat', dtype=str, delimiter = '\t')
         '''
         file = QFileDialog.getOpenFileName(self, os.getcwd())[0]
         data = np.loadtxt(file, dtype=str, delimiter = '\t')
         self.labelXfile.setText(file.split('/')[-1])
-        
+        '''
         self.X_Time = data[-1][0].astype(float)
         if self.detector_params['strip_integral'] == 'yes':
             self.X_Data = data[-1][1:-1].astype(float)
@@ -514,7 +503,7 @@ class QApp(QMainWindow):
         self.X_data_x = range(len(self.X_Data))
         self.X_data_y = self.X_Data
         self.XPlot.clear()
-        self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
+        self.Xraw = self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
         self.XPlot.setLabel('bottom','channels')
         self.XPlot.getPlotItem().enableAutoRange()
         
@@ -528,13 +517,13 @@ class QApp(QMainWindow):
   
 
     def Load_Y_Data(self):
-        '''
+        
         data = np.loadtxt('./data/strip/20151127_005129_miniQ-Y.dat', dtype=str, delimiter = '\t')
         '''
         file = QFileDialog.getOpenFileName(self, os.getcwd())[0]
         data = np.loadtxt(file, dtype=str, delimiter = '\t')
         self.labelYfile.setText(file.split('/')[-1])
-        
+        '''
         self.Y_Time = data[-1][0].astype(float)
         if self.detector_params['strip_integral'] == 'yes':
             self.Y_Data = data[-1][1:-1].astype(float)
@@ -545,7 +534,7 @@ class QApp(QMainWindow):
         self.Y_data_x = range(len(self.Y_Data))
         self.Y_data_y = self.Y_Data
         self.YPlot.clear()
-        self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
+        self.Yraw = self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
         self.YPlot.setLabel('bottom','channels')
         self.YPlot.getPlotItem().enableAutoRange()
         
@@ -564,14 +553,12 @@ class QApp(QMainWindow):
         else:
             self.isflipped = True
 
-        self.ZPlot.clear()
-        self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
+        self.ZPlot.removeItem(self.Zraw)
+        self.Zraw = self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
 
-        self.Zdataplot = True
-        if self.Zfitplot:
-            self.ZPlot.plot(self.Z_fit_x, self.Z_fit_y, pen = self.pen_fit)
         return
     
+
     def Enable_Z(self):
         if self.mlic_enable:
             self.mlic_enable = False
@@ -580,6 +567,7 @@ class QApp(QMainWindow):
             self.mlic_enable = True
             self.enableZ.setStyleSheet('background-color: None; color: green')
         return
+
 
     def Enable_Bortfeld(self):
         if self.bortfeld_enable:
@@ -590,6 +578,7 @@ class QApp(QMainWindow):
             self.enableBortfeld.setStyleSheet('background-color: None; color: green')
         return
     
+
     def Load_Z_Calibration(self):
 
         file = QFileDialog.getOpenFileName(self, os.getcwd())[0]
@@ -602,6 +591,7 @@ class QApp(QMainWindow):
         self.enableZcalib.setEnabled(True)
         return
     
+
     def Load_XY_Calibration(self):
 
         file = QFileDialog.getOpenFileName(self, os.getcwd())[0]
@@ -615,6 +605,7 @@ class QApp(QMainWindow):
         self.enableYcalib.setEnabled(True)
         return
     
+
     def Apply_Z_Calib(self):
         if self.isflipped:
             self.calibZ_vector = self.calibZ_vector_flip
@@ -623,48 +614,51 @@ class QApp(QMainWindow):
 
         if self.calibZ_enable:
             self.Z_data_y = self.Z_data_y / self.calibZ_vector
-            self.ZPlot.clear()
-            self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
+            self.ZPlot.removeItem(self.Zraw)
+            self.Zraw = self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
             self.calibZ_enable = False
             self.enableZcalib.setStyleSheet('background-color: None; color: None')
         else:
             self.Z_data_y = self.Z_data_y * self.calibZ_vector
-            self.ZPlot.clear()
-            self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
+            self.ZPlot.removeItem(self.Zraw)
+            self.Zraw = self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
             self.calibZ_enable = True
             self.enableZcalib.setStyleSheet('background-color: None; color: green')
         return
     
+
     def Apply_X_Calib(self):
         if self.calibX_enable:
             self.X_data_y = self.X_data_y / self.calibX_vector
-            self.XPlot.clear()
-            self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
+            self.XPlot.removeItem(self.Xraw)
+            self.Xraw = self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
             self.calibX_enable = False
             self.enableXcalib.setStyleSheet('background-color: None; color: None')
         else:
             self.X_data_y = self.X_data_y * self.calibX_vector
-            self.XPlot.clear()
-            self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
+            self.XPlot.removeItem(self.Xraw)
+            self.Xraw = self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
             self.calibX_enable = True
             self.enableXcalib.setStyleSheet('background-color: None; color: green')
         return
     
+
     def Apply_Y_Calib(self):
         if self.calibY_enable:
             self.Y_data_y = self.Y_data_y / self.calibY_vector
-            self.YPlot.clear()
-            self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
+            self.YPlot.removeItem(self.Yraw)
+            self.Yraw = self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
             self.calibY_enable = False
             self.enableYcalib.setStyleSheet('background-color: None; color: None')
         else:
             self.Y_data_y = self.Y_data_y * self.calibY_vector
-            self.YPlot.clear()
-            self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
+            self.YPlot.removeItem(self.Yraw)
+            self.Yraw = self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
             self.calibY_enable = True
             self.enableYcalib.setStyleSheet('background-color: None; color: green')
         return
     
+
     def Enable_X(self):
         if self.xpos_enable:
             self.xpos_enable = False
@@ -674,6 +668,7 @@ class QApp(QMainWindow):
             self.enableX.setStyleSheet('background-color: None; color: green')
         return
     
+
     def Enable_Y(self):
         if self.ypos_enable:
             self.ypos_enable = False
@@ -683,82 +678,51 @@ class QApp(QMainWindow):
             self.enableY.setStyleSheet('background-color: None; color: green')
         return
     
+
     def Shaw_Z_Data(self):
-        self.ZPlot.clear()
-        if self.Zdataplot:
-            self.Zdataplot = False
-            if self.Zfitplot:
-                self.ZPlot.plot(self.Z_fit_x, self.Z_fit_y, pen = self.pen_fit)
+        if self.Zraw.isVisible():
+            self.Zraw.hide()
         else:
-            self.Zdataplot = True
-            self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
-            if self.Zfitplot:
-                self.ZPlot.plot(self.Z_fit_x, self.Z_fit_y, pen = self.pen_fit)
+            self.Zraw.show()
         return
     
+
     def Shaw_Z_Fit(self):
-        self.ZPlot.clear()
-        if self.Zfitplot:
-            self.Zfitplot = False
-            if self.Zdataplot:
-                self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
+        if self.Zfit.isVisible():
+            self.Zfit.hide()
         else:
-            self.Zfitplot = True
-            if self.Zdataplot:
-                self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
-            self.ZPlot.plot(self.Z_fit_x, self.Z_fit_y, pen = self.pen_fit)
+            self.Zfit.show()
         return
+
     
     def Shaw_X_Data(self):
-        self.XPlot.clear()
-        if self.Xdataplot:
-            self.Xdataplot = False
-            if self.Xfitplot:
-                self.XPlot.plot(self.X_fit_x, self.X_fit_y, pen = self.pen_fit)
+        if self.Xraw.isVisible():
+            self.Xraw.hide()
         else:
-            self.Xdataplot = True
-            self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
-            if self.Xfitplot:
-                self.XPlot.plot(self.X_fit_x, self.X_fit_y, pen = self.pen_fit)
+            self.Xraw.show()
         return
     
+
     def Shaw_X_Fit(self):
-        self.XPlot.clear()
-        if self.Xfitplot:
-            self.Xfitplot = False
-            if self.Xdataplot:
-                self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
+        if self.Xfit.isVisible():
+            self.Xfit.hide()
         else:
-            self.Xfitplot = True
-            if self.Xdataplot:
-                self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
-            self.XPlot.plot(self.X_fit_x, self.X_fit_y, pen = self.pen_fit)
+            self.Xfit.show()
         return
 
     def Shaw_Y_Data(self):
-        self.YPlot.clear()
-        if self.Ydataplot:
-            self.Ydataplot = False
-            if self.Yfitplot:
-                self.YPlot.plot(self.Y_fit_x, self.Y_fit_y, pen = self.pen_fit)
+        if self.Yraw.isVisible():
+            self.Yraw.hide()
         else:
-            self.Ydataplot = True
-            self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
-            if self.Yfitplot:
-                self.YPlot.plot(self.Y_fit_x, self.Y_fit_y, pen = self.pen_fit)
+            self.Yraw.show()
         return
     
+
     def Shaw_Y_Fit(self):
-        self.YPlot.clear()
-        if self.Yfitplot:
-            self.Yfitplot = False
-            if self.Ydataplot:
-                self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
+        if self.Yfit.isVisible():
+            self.Yfit.hide()
         else:
-            self.Yfitplot = True
-            if self.Ydataplot:
-                self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
-            self.YPlot.plot(self.Y_fit_x, self.Y_fit_y, pen = self.pen_fit)
+            self.Yfit.show()
         return
     
     
@@ -786,12 +750,6 @@ class QApp(QMainWindow):
         self.calibX_enable   = False
         self.calibY_enable   = False
         self.isflipped       = False
-        self.Zdataplot = False
-        self.Zfitplot  = False
-        self.Xdataplot = False
-        self.Xfitplot  = False
-        self.Ydataplot = False
-        self.Yfitplot  = False
 
         # Label
         self.labelZfile.setText('')
@@ -870,12 +828,10 @@ class QApp(QMainWindow):
 
             self.ZPlot.clear()
             self.ZPlot.setLabel('bottom','depth [cm w.e.]')
-            self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
-            self.ZPlot.plot(self.Z_fit_x, self.Z_fit_y, pen = self.pen_fit)
+            self.Zraw = self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
+            self.Zfit = self.ZPlot.plot(self.Z_fit_x, self.Z_fit_y, pen = self.pen_fit)
             self.ZPlot.getPlotItem().enableAutoRange()
             self.shawZfit.setEnabled(True)
-            self.Zdataplot = True
-            self.Zfitplot = True
             self.labelResultsZ.setText('\n\n\n{:.2f}\t{}\n\n{:.2f}\t{}\n\n{:.2f}\t{}\n\n{:.2f}\t{}'.format(self.Zres['peak_pos']['value'],self.Zres['peak_pos']['unit'],
                                                                                            self.Zres['pp_ratio']['value'],self.Zres['pp_ratio']['unit'],
                                                                                            self.Zres['cl_range']['value'],self.Zres['cl_range']['unit'],
@@ -892,12 +848,10 @@ class QApp(QMainWindow):
 
             self.XPlot.clear()
             self.XPlot.setLabel('bottom','[mm]')
-            self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
-            self.XPlot.plot(self.X_fit_x, self.X_fit_y, pen = self.pen_fit)
+            self.Xraw = self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
+            self.Xfit = self.XPlot.plot(self.X_fit_x, self.X_fit_y, pen = self.pen_fit)
             self.XPlot.getPlotItem().enableAutoRange()
             self.shawXfit.setEnabled(True)
-            self.Xdataplot = True
-            self.Xfitplot = True
             self.labelResultsX.setText('\n\n\n{:.2f}\t{}\n\n{:.2f}\t{}\n\n{:.2f}\t{}\n\n{:.2f}\t{}'.format(self.Xres['mean']['value'],self.Xres['mean']['unit'],
                                                                                            self.Xres['sigma']['value'],self.Xres['sigma']['unit'],
                                                                                            self.Xres['fwhm']['value'],self.Xres['fwhm']['unit'],
@@ -914,12 +868,10 @@ class QApp(QMainWindow):
 
             self.YPlot.clear()
             self.YPlot.setLabel('bottom','[mm]')
-            self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
-            self.YPlot.plot(self.Y_fit_x, self.Y_fit_y, pen = self.pen_fit)
+            self.Yraw = self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
+            self.Yfit = self.YPlot.plot(self.Y_fit_x, self.Y_fit_y, pen = self.pen_fit)
             self.YPlot.getPlotItem().enableAutoRange()
             self.shawYfit.setEnabled(True)
-            self.Ydataplot = True
-            self.Yfitplot = True
             self.labelResultsY.setText('\n\n\n{:.2f}\t{}\n\n{:.2f}\t{}\n\n{:.2f}\t{}\n\n{:.2f}\t{}'.format(self.Yres['mean']['value'],self.Yres['mean']['unit'],
                                                                                            self.Yres['sigma']['value'],self.Yres['sigma']['unit'],
                                                                                            self.Yres['fwhm']['value'],self.Yres['fwhm']['unit'],

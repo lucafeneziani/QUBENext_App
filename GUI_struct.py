@@ -459,92 +459,118 @@ class QApp(QMainWindow):
 
     ########################################################################################################################################
     def Load_Z_Data(self):
-        
-        data = np.loadtxt('./data/mlic/20161019_011009_QUBE.dat', dtype=str, delimiter = '\t')
-        '''
-        file = QFileDialog.getOpenFileName(self, os.getcwd())[0]
-        data = np.loadtxt(file, dtype=str, delimiter = '\t')
-        self.labelZfile.setText(file.split('/')[-1])
-        '''
-        self.Z_Time = data[-1][0].astype(float)
-        self.Z_Data = data[-1][1::].astype(float)
+            
+        try:
+            '''
+            data = np.loadtxt('./data/mlic/20161019_011009_QUBE.dat', dtype=str, delimiter = '\t')
+            '''
+            file = QFileDialog.getOpenFileName(self, os.getcwd())[0]
+            data = np.loadtxt(file, dtype=str, delimiter = '\t')
+            self.labelZfile.setText(file.split('/')[-1])
+            
+            self.Z_Time = data[-1][0].astype(float)
+            self.Z_Data = data[-1][1::].astype(float)
 
-        self.Z_data_x = range(len(self.Z_Data))
-        self.Z_data_y = self.Z_Data
-        self.ZPlot.clear()
-        self.Zraw = self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
-        self.ZPlot.setLabel('bottom','channels')
-        self.ZPlot.getPlotItem().enableAutoRange()
+            self.Z_data_x = range(len(self.Z_Data))
+            self.Z_data_y = self.Z_Data
+            self.ZPlot.clear()
+            self.Zraw = self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
+            self.ZPlot.setLabel('bottom','channels')
+            self.ZPlot.getPlotItem().enableAutoRange()
 
-        self.shawZraw.setEnabled(True)
-        self.reverseZdata.setEnabled(True)
-        self.enableZ.setEnabled(True)
-        self.enableBortfeld.setEnabled(True)
-        self.loadZcalib.setEnabled(True)
-        self.analyze.setEnabled(True)
-        self.resetZplot.setEnabled(True)
+            self.shawZraw.setEnabled(True)
+            self.reverseZdata.setEnabled(True)
+            self.enableZ.setEnabled(True)
+            self.enableBortfeld.setEnabled(True)
+            self.loadZcalib.setEnabled(True)
+            self.analyze.setEnabled(True)
+            self.resetZplot.setEnabled(True)
+
+        except:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Warning")
+            msg.setInformativeText('Unrecognized data format - Check the upload')
+            msg.exec_()
 
 
     def Load_X_Data(self):
-        
-        data = np.loadtxt('./data/strip/20151127_005129_miniQ-X.dat', dtype=str, delimiter = '\t')
-        '''
-        file = QFileDialog.getOpenFileName(self, os.getcwd())[0]
-        data = np.loadtxt(file, dtype=str, delimiter = '\t')
-        self.labelXfile.setText(file.split('/')[-1])
-        '''
-        self.X_Time = data[-1][0].astype(float)
-        if self.detector_params['strip_integral'] == 'yes':
-            self.X_Data = data[-1][1:-1].astype(float)
-            self.X_integral = data[-1][-1].astype(float)
-        else:
-            self.X_Data = data[-1][1::].astype(float)
 
-        self.X_data_x = range(len(self.X_Data))
-        self.X_data_y = self.X_Data
-        self.XPlot.clear()
-        self.Xraw = self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
-        self.XPlot.setLabel('bottom','channels')
-        self.XPlot.getPlotItem().enableAutoRange()
+        try:
+            '''
+            data = np.loadtxt('./data/strip/20151127_005129_miniQ-X.dat', dtype=str, delimiter = '\t')
+            '''
+            file = QFileDialog.getOpenFileName(self, os.getcwd())[0]
+            data = np.loadtxt(file, dtype=str, delimiter = '\t')
+            self.labelXfile.setText(file.split('/')[-1])
+            
+            self.X_Time = data[-1][0].astype(float)
+            if self.detector_params['strip_integral'] == 'yes':
+                self.X_Data = data[-1][1:-1].astype(float)
+                self.X_integral = data[-1][-1].astype(float)
+            else:
+                self.X_Data = data[-1][1::].astype(float)
+
+            self.X_data_x = range(len(self.X_Data))
+            self.X_data_y = self.X_Data
+            self.XPlot.clear()
+            self.Xraw = self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
+            self.XPlot.setLabel('bottom','channels')
+            self.XPlot.getPlotItem().enableAutoRange()
+            
+            self.shawXraw.setEnabled(True)
+            self.enableX.setEnabled(True)
+            self.loadXYcalib.setEnabled(True)
+            self.analyze.setEnabled(True)
+            self.resetXplot.setEnabled(True)
+            self.Xdataplot = True
         
-        self.shawXraw.setEnabled(True)
-        self.enableX.setEnabled(True)
-        self.loadXYcalib.setEnabled(True)
-        self.analyze.setEnabled(True)
-        self.resetXplot.setEnabled(True)
-        self.Xdataplot = True
+        except:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Warning")
+            msg.setInformativeText('Unrecognized data format - Check the upload')
+            msg.exec_()
 
   
 
     def Load_Y_Data(self):
-        
-        data = np.loadtxt('./data/strip/20151127_005129_miniQ-Y.dat', dtype=str, delimiter = '\t')
-        '''
-        file = QFileDialog.getOpenFileName(self, os.getcwd())[0]
-        data = np.loadtxt(file, dtype=str, delimiter = '\t')
-        self.labelYfile.setText(file.split('/')[-1])
-        '''
-        self.Y_Time = data[-1][0].astype(float)
-        if self.detector_params['strip_integral'] == 'yes':
-            self.Y_Data = data[-1][1:-1].astype(float)
-            self.Y_integral = data[-1][-1].astype(float)
-        else:
-            self.Y_Data = data[-1][1::].astype(float)
 
-        self.Y_data_x = range(len(self.Y_Data))
-        self.Y_data_y = self.Y_Data
-        self.YPlot.clear()
-        self.Yraw = self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
-        self.YPlot.setLabel('bottom','channels')
-        self.YPlot.getPlotItem().enableAutoRange()
+        try:
+            '''
+            data = np.loadtxt('./data/strip/20151127_005129_miniQ-Y.dat', dtype=str, delimiter = '\t')
+            '''
+            file = QFileDialog.getOpenFileName(self, os.getcwd())[0]
+            data = np.loadtxt(file, dtype=str, delimiter = '\t')
+            self.labelYfile.setText(file.split('/')[-1])
         
-        self.shawYraw.setEnabled(True)
-        self.enableY.setEnabled(True)
-        self.loadXYcalib.setEnabled(True)
-        self.analyze.setEnabled(True)
-        self.resetYplot.setEnabled(True)
-        self.Ydataplot = True
+            self.Y_Time = data[-1][0].astype(float)
+            if self.detector_params['strip_integral'] == 'yes':
+                self.Y_Data = data[-1][1:-1].astype(float)
+                self.Y_integral = data[-1][-1].astype(float)
+            else:
+                self.Y_Data = data[-1][1::].astype(float)
 
+            self.Y_data_x = range(len(self.Y_Data))
+            self.Y_data_y = self.Y_Data
+            self.YPlot.clear()
+            self.Yraw = self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
+            self.YPlot.setLabel('bottom','channels')
+            self.YPlot.getPlotItem().enableAutoRange()
+            
+            self.shawYraw.setEnabled(True)
+            self.enableY.setEnabled(True)
+            self.loadXYcalib.setEnabled(True)
+            self.analyze.setEnabled(True)
+            self.resetYplot.setEnabled(True)
+            self.Ydataplot = True
+        
+        except:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Warning")
+            msg.setInformativeText('Unrecognized data format - Check the upload')
+            msg.exec_()
 
     def Reverse_Z_Data(self):
         self.Z_data_y = np.flip(self.Z_data_y)

@@ -74,7 +74,7 @@ def mlic_analysis(data_array, bortfeld):
     # smoothed_curve = tls.multiply_data_points(sample_studied, x_coord_we, 10)
     smoothed_curve = savgol_filter(sample_studied, 9, 4)
     maxIndex_smooth = np.argmax(smoothed_curve)
-    R0Index_smooth = find_right_perc(smoothed_curve, maxIndex_smooth, 0.8)
+    R0Index_smooth = find_right_perc(smoothed_curve, maxIndex_smooth, CLINICAL_RANGE_PERC)
     # startIndex_smooth = utls.find_left_perc(smoothed_curve, maxIndex_smooth, 0.9)
     stopIndex_smooth = R0Index_smooth + (R0Index_smooth-maxIndex_smooth)
     # bortfeld_proto = tls.createBortfeldCurves(x_coord_fit_we, np.average(sample_studied[0]))
@@ -122,8 +122,8 @@ def mlic_analysis(data_array, bortfeld):
         peak_pos = x_coord_fit_we[peak_index]
         #peak_pos = x_coord_we[peak_index]
         plt_mean = np.average(ym_norm[:3])
-        cl_range = find_cl_range(ym_norm, x_coord_fit_we, peak_index, 0.8)
-        back_cl_range = find_cl_range_back(ym_norm, x_coord_fit_we, peak_index, 0.8)
+        cl_range = find_cl_range(ym_norm, x_coord_fit_we, peak_index, CLINICAL_RANGE_PERC)
+        back_cl_range = find_cl_range_back(ym_norm, x_coord_fit_we, peak_index, CLINICAL_RANGE_PERC)
         #cl_range = utls.find_cl_range(ym_norm, x_coord_we, peak_index, 0.8)
         #back_cl_range = utls.find_cl_range_back(ym_norm, x_coord_we, peak_index, 0.8)
     else:
@@ -132,8 +132,8 @@ def mlic_analysis(data_array, bortfeld):
         peak_pos = x_coord_fit_we[peak_index]
         #peak_pos = x_coord_we[peak_index]
         plt_mean = np.average(smoothed_curve[:3])
-        cl_range = find_cl_range(smoothed_curve, x_coord_fit_we, peak_index, 0.8)
-        back_cl_range = find_cl_range_back(smoothed_curve, x_coord_fit_we, peak_index, 0.8)
+        cl_range = find_cl_range(smoothed_curve, x_coord_fit_we, peak_index, CLINICAL_RANGE_PERC)
+        back_cl_range = find_cl_range_back(smoothed_curve, x_coord_fit_we, peak_index, CLINICAL_RANGE_PERC)
         #cl_range = utls.find_cl_range(smoothed_curve, x_coord_we, peak_index, 0.8)
         #back_cl_range = utls.find_cl_range_back(smoothed_curve, x_coord_we, peak_index, 0.8)
     

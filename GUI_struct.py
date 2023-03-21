@@ -8,6 +8,7 @@ import os
 
 import functions
 import configuration_params
+from constants import CLINICAL_RANGE_PERC
 
 
 ########################################################################################################################################
@@ -212,7 +213,7 @@ class QApp(QMainWindow):
         self.labelResultsZt = QLabel(self)
         self.labelResultsZt.move(round(0.04*width), round(0.7*height))
         self.labelResultsZt.resize(round(0.15*width), round(0.25*height))
-        self.labelResultsZt.setText('\n\n\nPeak position:\n\nPeak-plateau ratio:\n\nClinical range (R80):\n\nPeak width (@80%):')
+        self.labelResultsZt.setText('\n\n\nPeak position:\n\nPeak-plateau ratio:\n\nClinical range (R{:d}):\n\nPeak width (@{:d}%):'.format(int(CLINICAL_RANGE_PERC*100),int(CLINICAL_RANGE_PERC*100)))
         self.labelResultsZt.setFont(textstyle)
         self.labelResultsZt.setStyleSheet('background-color: None')
         #
@@ -606,82 +607,128 @@ class QApp(QMainWindow):
     
 
     def Load_Z_Calibration(self):
+        
+        try:
+            file = QFileDialog.getOpenFileName(self, os.getcwd())[0]
+            data = np.loadtxt(file, dtype=str, delimiter = '\t')
+            self.labelZcalib.setText(file.split('/')[-1])
 
-        file = QFileDialog.getOpenFileName(self, os.getcwd())[0]
-        data = np.loadtxt(file, dtype=str, delimiter = '\t')
-        self.labelZcalib.setText(file.split('/')[-1])
+            self.calibZ_vector_orig = np.transpose(data)[1][1::].astype(float)
+            self.calibZ_vector_flip = np.flip(self.calibZ_vector_orig)
 
-        self.calibZ_vector_orig = np.transpose(data)[1][1::].astype(float)
-        self.calibZ_vector_flip = np.flip(self.calibZ_vector_orig)
+            self.enableZcalib.setEnabled(True)
 
-        self.enableZcalib.setEnabled(True)
+        except:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Warning")
+            msg.setInformativeText('Unrecognized data format - Check the upload')
+            msg.exec_()
+
         return
     
 
     def Load_XY_Calibration(self):
 
-        file = QFileDialog.getOpenFileName(self, os.getcwd())[0]
-        data = np.loadtxt(file, dtype=str, delimiter = '\t')
-        self.labelXYcalib.setText(file.split('/')[-1])
+        try:
+            file = QFileDialog.getOpenFileName(self, os.getcwd())[0]
+            data = np.loadtxt(file, dtype=str, delimiter = '\t')
+            self.labelXYcalib.setText(file.split('/')[-1])
 
-        self.calibX_vector = np.transpose(data)[1][1::].astype(float)
-        self.calibY_vector = np.transpose(data)[2][1::].astype(float)
+            self.calibX_vector = np.transpose(data)[1][1::].astype(float)
+            self.calibY_vector = np.transpose(data)[2][1::].astype(float)
 
-        self.enableXcalib.setEnabled(True)
-        self.enableYcalib.setEnabled(True)
+            self.enableXcalib.setEnabled(True)
+            self.enableYcalib.setEnabled(True)
+        
+        except:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Warning")
+            msg.setInformativeText('Unrecognized data format - Check the upload')
+            msg.exec_()
+
         return
     
 
     def Apply_Z_Calib(self):
-        if self.isflipped:
-            self.calibZ_vector = self.calibZ_vector_flip
-        else:
-            self.calibZ_vector = self.calibZ_vector_orig
+        try:
+            if self.isflipped:
+                self.calibZ_vector = self.calibZ_vector_flip
+            else:
+                self.calibZ_vector = self.calibZ_vector_orig
 
-        if self.calibZ_enable:
-            self.Z_data_y = self.Z_data_y / self.calibZ_vector
-            self.ZPlot.removeItem(self.Zraw)
-            self.Zraw = self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
-            self.calibZ_enable = False
-            self.enableZcalib.setStyleSheet('background-color: None; color: None')
-        else:
-            self.Z_data_y = self.Z_data_y * self.calibZ_vector
-            self.ZPlot.removeItem(self.Zraw)
-            self.Zraw = self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
-            self.calibZ_enable = True
-            self.enableZcalib.setStyleSheet('background-color: None; color: green')
+            if self.calibZ_enable:
+                self.Z_data_y = self.Z_data_y / self.calibZ_vector
+                self.ZPlot.removeItem(self.Zraw)
+                self.Zraw = self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
+                self.calibZ_enable = False
+                self.enableZcalib.setStyleSheet('background-color: None; color: None')
+            else:
+                self.Z_data_y = self.Z_data_y * self.calibZ_vector
+                self.ZPlot.removeItem(self.Zraw)
+                self.Zraw = self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
+                self.calibZ_enable = True
+                self.enableZcalib.setStyleSheet('background-color: None; color: green')
+
+        except:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Warning")
+            msg.setInformativeText('Error during calibration applying')
+            msg.exec_()
+
         return
     
 
     def Apply_X_Calib(self):
-        if self.calibX_enable:
-            self.X_data_y = self.X_data_y / self.calibX_vector
-            self.XPlot.removeItem(self.Xraw)
-            self.Xraw = self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
-            self.calibX_enable = False
-            self.enableXcalib.setStyleSheet('background-color: None; color: None')
-        else:
-            self.X_data_y = self.X_data_y * self.calibX_vector
-            self.XPlot.removeItem(self.Xraw)
-            self.Xraw = self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
-            self.calibX_enable = True
-            self.enableXcalib.setStyleSheet('background-color: None; color: green')
+
+        try:
+            if self.calibX_enable:
+                self.X_data_y = self.X_data_y / self.calibX_vector
+                self.XPlot.removeItem(self.Xraw)
+                self.Xraw = self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
+                self.calibX_enable = False
+                self.enableXcalib.setStyleSheet('background-color: None; color: None')
+            else:
+                self.X_data_y = self.X_data_y * self.calibX_vector
+                self.XPlot.removeItem(self.Xraw)
+                self.Xraw = self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
+                self.calibX_enable = True
+                self.enableXcalib.setStyleSheet('background-color: None; color: green')
+
+        except:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Warning")
+            msg.setInformativeText('Error during calibration applying')
+            msg.exec_()
         return
     
 
     def Apply_Y_Calib(self):
-        if self.calibY_enable:
-            self.Y_data_y = self.Y_data_y / self.calibY_vector
-            self.YPlot.removeItem(self.Yraw)
-            self.Yraw = self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
-            self.calibY_enable = False
-            self.enableYcalib.setStyleSheet('background-color: None; color: None')
-        else:
-            self.Y_data_y = self.Y_data_y * self.calibY_vector
-            self.YPlot.removeItem(self.Yraw)
-            self.Yraw = self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
-            self.calibY_enable = True
-            self.enableYcalib.setStyleSheet('background-color: None; color: green')
+
+        try:
+            if self.calibY_enable:
+                self.Y_data_y = self.Y_data_y / self.calibY_vector
+                self.YPlot.removeItem(self.Yraw)
+                self.Yraw = self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
+                self.calibY_enable = False
+                self.enableYcalib.setStyleSheet('background-color: None; color: None')
+            else:
+                self.Y_data_y = self.Y_data_y * self.calibY_vector
+                self.YPlot.removeItem(self.Yraw)
+                self.Yraw = self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
+                self.calibY_enable = True
+                self.enableYcalib.setStyleSheet('background-color: None; color: green')
+        
+        except:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Warning")
+            msg.setInformativeText('Error during calibration applying')
+            msg.exec_()
+
         return
     
 
@@ -839,6 +886,24 @@ class QApp(QMainWindow):
 
     
     def Analyze(self):
+
+        self.labelResultsZ.setText('\n\n\n--\n\n--\n\n--\n\n--')
+        self.labelResultsX.setText('\n\n\n--\n\n--\n\n--\n\n--')
+        self.labelResultsY.setText('\n\n\n--\n\n--\n\n--\n\n--')
+        
+        try:
+            self.Zfit.hide()
+        except:
+            pass
+        try:
+            self.Xfit.hide()
+        except:
+            pass
+        try:
+            self.Yfit.hide()
+        except:
+            pass
+            
 
         # MLIC Analysis (Z Profile)
         if self.mlic_enable:

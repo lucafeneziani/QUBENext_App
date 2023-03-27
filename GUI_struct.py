@@ -10,6 +10,7 @@ import functions
 import configuration_params
 from constants import CLINICAL_RANGE_PERC
 
+DIRECTORY = '/Users/lucafeneziani/Desktop/QUBENext_App/'
 
 ########################################################################################################################################
 
@@ -59,14 +60,15 @@ class QApp(QMainWindow):
 
         # Bar
         self.barlabel = QLabel(self)
-        self.pixmap = QPixmap('/Users/lucafeneziani/Desktop/QUBENext_App/images/bar.png')
+        self.pixmap = QPixmap(DIRECTORY + 'images/bar.png')
+        self.pixmap = self.pixmap.scaledToWidth(round(width),Qt.SmoothTransformation)
         self.barlabel.setPixmap(self.pixmap)
         self.barlabel.resize(round(width), round(0.08*height))
         self.barlabel.move(round(0.0*width), round(0.0*height))
 
         # De.Tec.Tor Logo
         self.logolabel = QLabel(self)
-        self.pixmap = QPixmap('/Users/lucafeneziani/Desktop/QUBENext_App/images/DeTecTor.png')
+        self.pixmap = QPixmap(DIRECTORY + 'images/DeTecTor.png')
         self.pixmap = self.pixmap.scaled(round(0.25*width), round(0.1*height),Qt.KeepAspectRatio,Qt.SmoothTransformation)
         self.logolabel.setPixmap(self.pixmap)
         self.logolabel.resize(round(0.27*width), round(0.08*height))
@@ -75,9 +77,8 @@ class QApp(QMainWindow):
 
         # Device logo
         self.logolabel = QLabel(self)
-        self.pixmap = QPixmap('/Users/lucafeneziani/Desktop/QUBENext_App/images/detectors/logo_QUBENext.png')
-        #self.pixmap = QPixmap('./images/detectors/logo_'+self.detector_params['detector_type']+'.png')
-        self.pixmap = self.pixmap.scaled(round(0.15*width), round(0.1*height),Qt.KeepAspectRatio,Qt.SmoothTransformation)
+        self.pixmap = QPixmap(DIRECTORY + 'images/detectors/logo_QUBENext.png')
+        self.pixmap = self.pixmap.scaled(round(0.2*width), round(0.1*height),Qt.KeepAspectRatio,Qt.SmoothTransformation)
         self.logolabel.setPixmap(self.pixmap)
         self.logolabel.resize(round(0.27*width), round(0.08*height))
         self.logolabel.move(round(0.05*width), round(0.0*height))
@@ -85,7 +86,7 @@ class QApp(QMainWindow):
 
         #########################################################################
         # LEFT SIDE
-        
+
         # Z Plot
         self.ZPlot = pg.PlotWidget(self)
         self.ZPlot.setLabel('left','counts')

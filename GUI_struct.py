@@ -608,6 +608,16 @@ class QApp(QMainWindow):
     
 
     def Load_Z_Calibration(self):
+
+        if self.calibZ_enable:
+            self.Z_data_y = self.Z_data_y / self.calibZ_vector
+            self.ZPlot.removeItem(self.Zraw)
+            self.Zraw = self.ZPlot.plot(self.Z_data_x, self.Z_data_y, pen = self.pen_data)
+
+        self.labelZcalib.setText('')
+        self.calibZ_enable = False
+        self.enableZcalib.setStyleSheet('background-color: None; color: None')
+        self.enableZcalib.setEnabled(False)
         
         try:
             file = QFileDialog.getOpenFileName(self, os.getcwd())[0]
@@ -630,6 +640,25 @@ class QApp(QMainWindow):
     
 
     def Load_XY_Calibration(self):
+
+        if self.calibX_enable:
+            self.X_data_y = self.X_data_y / self.calibX_vector
+            self.XPlot.removeItem(self.Xraw)
+            self.Xraw = self.XPlot.plot(self.X_data_x, self.X_data_y, pen = self.pen_data)
+
+        if self.calibY_enable:
+            self.Y_data_y = self.Y_data_y / self.calibY_vector
+            self.YPlot.removeItem(self.Yraw)
+            self.Yraw = self.YPlot.plot(self.Y_data_x, self.Y_data_y, pen = self.pen_data)
+
+        self.labelXYcalib.setText('')
+        self.calibX_enable = False
+        self.calibY_enable = False
+        self.enableXcalib.setStyleSheet('background-color: None; color: None')
+        self.enableYcalib.setStyleSheet('background-color: None; color: None')
+        self.enableXcalib.setEnabled(False)
+        self.enableYcalib.setEnabled(False)
+
 
         try:
             file = QFileDialog.getOpenFileName(self, os.getcwd())[0]
